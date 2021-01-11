@@ -1,5 +1,5 @@
 [package]
-name = "snake_game"
+name = "connect4"
 version = "0.1.0"
 authors = ["youcodethings <spyr1014@gmail.com>"]
 

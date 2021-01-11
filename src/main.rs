@@ -15,7 +15,7 @@ use piston::input::*;
 use piston::window::WindowSettings;
 
 fn main() {
-    let settings = WindowSettings::new("Connect 5", [500, 500]);
+    let settings = WindowSettings::new("Connect 4", [500, 500]);
 
     let mut window: GlutinWindow = settings.exit_on_esc(true).build().unwrap();
 
@@ -30,7 +30,7 @@ fn main() {
         }
 
         if let Some(mouse_args) = event.mouse_cursor_args() {
-            // Do something
+            // TODO: Add Mouse Focus and Mouse Commands
         } 
 
         if let Some(press_event) = event.press_args() {         
