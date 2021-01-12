@@ -1,12 +1,10 @@
-extern crate config;
 extern crate glutin_window;
 extern crate graphics;
 extern crate opengl_graphics;
 extern crate piston;
-extern crate snake_game;
-extern crate toml;
+extern crate connect4;
 
-use snake_game::*;
+use connect4::*;
 
 use glutin_window::GlutinWindow;
 use opengl_graphics::OpenGL;
@@ -38,13 +36,13 @@ fn main() {
             if let Button::Keyboard(key) = press_event {
                 let result = match key {
                     Key::Q => break,
-                    Key::D1 => game.make_move(player, 0),
-                    Key::D2 => game.make_move(player, 1),
-                    Key::D3 => game.make_move(player, 2),
+                    Key::D1 => game.make_move(player, 6),
+                    Key::D2 => game.make_move(player, 5),
+                    Key::D3 => game.make_move(player, 4),
                     Key::D4 => game.make_move(player, 3),
-                    Key::D5 => game.make_move(player, 4),
-                    Key::D6 => game.make_move(player, 5),
-                    Key::D7 => game.make_move(player, 6),
+                    Key::D5 => game.make_move(player, 2),
+                    Key::D6 => game.make_move(player, 1),
+                    Key::D7 => game.make_move(player, 0),
                     Key::R => {
                         game = Game::new(OpenGL::V3_2);
                         Ok(())
