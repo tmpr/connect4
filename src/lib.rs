@@ -24,27 +24,25 @@ pub struct Game {
 
 #[derive(Debug)]
 pub struct Grid {
-    grid: Vec<VecDeque<Stone>>,
+    grid: Vec<Vec<Stone>>,
 }
 
 impl Grid {
     fn neutral() -> Self {
         Grid {
-            grid: (0..=6)
-                .map(|_| (0..=5).map(|_| Stone::Neutral).collect())
-                .collect(),
+            grid: vec![vec![Stone::Neutral; 6]; 7],
         }
     }
 
     fn empty() -> Self {
         Grid {
-            grid: (0..=6).map(|_| VecDeque::new()).collect(),
+            grid: vec![Vec::new(); 7],
         }
     }
 
     fn render(&mut self, gl: &mut GlGraphics, arg: &RenderArgs) {
-        for (x, row) in self.grid.iter_mut().rev().enumerate() {
-            for (y, stone) in row.iter_mut().rev().enumerate() {
+        for (x, row) in self.grid.iter_mut().enumerate() {
+            for (y, stone) in row.iter_mut().enumerate() {
                 stone.render(6 - x, 5 - y, gl, arg)
             }
         }
@@ -72,9 +70,7 @@ impl Stone {
             graphics::ellipse::circle((x * 70 + 40) as f64, (y * 70 + 105) as f64, 30 as f64);
 
         gl.draw(arg.viewport(), |c, gl| {
-            let transform = c.transform;
-
-            graphics::ellipse(self.color(), circle, transform, gl)
+            graphics::ellipse(self.color(), circle, c.transform, gl)
         });
     }
 }
@@ -90,7 +86,7 @@ impl Game {
 
     pub fn render(&mut self, arg: &RenderArgs) {
         self.gl
-            .draw(arg.viewport(), |_c, gl| graphics::clear(hex(GREY), gl));
+            .draw(arg.viewport(), |_, gl| graphics::clear(hex(GREY), gl));
 
         self.grid.render(&mut self.gl, arg);
         self.stones.render(&mut self.gl, arg);
@@ -102,7 +98,7 @@ impl Game {
                 "This column is full! Please choose another one.",
             ));
         }
-        self.stones.grid[column].push_front(player);
+        self.stones.grid[column].push(player);
         Ok(())
     }
 }
