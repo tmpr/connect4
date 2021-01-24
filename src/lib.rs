@@ -167,160 +167,47 @@ impl Game {
         let y = self.stones.grid[column].len() - 1;
         let x = column;
 
-
-
-
-        let mut horizontal = 0;
-        let mut i = 1;
-        // Horizontal Check
-        loop {
-            if column < i {break;}
-            match self.stones.grid.get(column - i) {
-                Some(col) => match col.get(y) {
-                    Some(stone) => {
-                        if stone == &player {
-                            horizontal += 1;
-                            i += 1;
-                        } else {
-                            break;
-                        }
-                    },
-                    None => break
-                }
-                None => break
-            }
-        }
-
-        let mut i = 1;
-        loop {
-            match self.stones.grid.get(column + i) {
-                Some(col) => match col.get(y) {
-                    Some(stone) => {
-                        if stone == &player {
-                            horizontal += 1;
-                            i += 1;
-                        } else {
-                            break;
-                        }
-                    },
-                    None => break
-                }
-                None => break
-            }
-        }
-
-        let mut vertical = 0;
-        let mut i = 1;
-        // Horizontal Check
-        loop {
-            if y < i {break;}
-            match self.stones.grid.get(column) {
-                Some(col) => match col.get(y - i) {
-                    Some(stone) => {
-                        if stone == &player {
-                            vertical += 1;
-                            i += 1;
-                        } else {
-                            break;
-                        }
-                    },
-                    None => break
-                }
-                None => break
-            }
-        }
-
-
-        let mut ldiag = 0;
-        let mut i = 1;
-        // Horizontal Check
-        loop {
-            if y < i {break;}
-            match self.stones.grid.get(column + i) {
-                Some(col) => match col.get(y - i) {
-                    Some(stone) => {
-                        if stone == &player {
-                            ldiag += 1;
-                            i += 1;
-                        } else {
-                            break;
-                        }
-                    },
-                    None => break
-                }
-                None => break
-            }
-        }
-
-        let mut i = 1;
-        // Horizontal Check
-        loop {
-            if column < i {break;}
-            match self.stones.grid.get(column - i) {
-                Some(col) => match col.get(y + i) {
-                    Some(stone) => {
-                        if stone == &player {
-                            ldiag += 1;
-                            i += 1;
-                        } else {
-                            break;
-                        }
-                    },
-                    None => break
-                }
-                None => break
-            }
-        }
-
-        let mut rdiag = 0;
-        let mut i = 1;
-        // Horizontal Check
-        loop {
-            if column < i {break;}
-            match self.stones.grid.get(column + i) {
-                Some(col) => match col.get(y + i) {
-                    Some(stone) => {
-                        if stone == &player {
-                            rdiag += 1;
-                            i += 1;
-                        } else {
-                            break;
-                        }
-                    },
-                    None => break
-                }
-                None => break
-            }
-        }
-
-        let mut i = 1;
-        // Horizontal Check
-        loop {
-            if column < i || y < i {break;}
-            match self.stones.grid.get(column - i) {
-                Some(col) => match col.get(y - i) {
-                    Some(stone) => {
-                        if stone == &player {
-                            rdiag += 1;
-                            i += 1;
-                        } else {
-                            break;
-                        }
-                    },
-                    None => break
-                }
-                None => break
-            }
-        }
+        let down_diag = self.check_neighbours(x as i8, y as i8, 1, 1, &player) +
+                        self.check_neighbours(x as i8, y as i8, -1, -1, &player);
         
+        let up_diag = self.check_neighbours(x as i8, y as i8, -1, 1, &player) +
+                          self.check_neighbours(x as i8, y as i8, 1, -1, &player);
+        
+        let horizontal = self.check_neighbours(x as i8, y as i8, -1, 0, &player) +
+                            self.check_neighbours(x as i8, y as i8, 1, 0, &player);
+        
+        let vertical = self.check_neighbours(x as i8, y as i8, 0, 1, &player) +
+                            self.check_neighbours(x as i8, y as i8, 0, -1, &player);
 
-
-
-        println!("{}", rdiag);
-        if horizontal >= 3 || vertical >= 3 || ldiag >= 3 || rdiag >= 3 {
+        if horizontal >= 3 || vertical >= 3 || down_diag >= 3 || up_diag >= 3 {
             return Move::Win(player)
         }
 
         Move::SetStone
     }
+
+    pub fn check_neighbours(&self, x: i8, y: i8, dx: i8, dy: i8, player: &Stone) -> u32 {
+        let mut i = 1;
+        let mut count = 0;
+        // Horizontal Check
+        loop {
+            if (dx == -1 && x == 0) || (dy == -1 && y == 0) {break;}
+            match self.stones.grid.get((x + (i * dx)) as usize) {
+                Some(col) => match col.get((y + (i * dy)) as usize) {
+                    Some(stone) => {
+                        if stone == player {
+                            count += 1;
+                            i += 1;
+                        } else {
+                            break;
+                        }
+                    },
+                    None => break
+                }
+                None => break
+            }
+        }
+        return count
+    }
 }
+

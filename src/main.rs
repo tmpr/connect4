@@ -27,6 +27,8 @@ fn main() {
     let mut mouse_x = -1.;
 
 
+    let mut sleep = 0;
+
     // Event Loop
     while let Some(event) = events.next(&mut window) {
 
@@ -34,6 +36,13 @@ fn main() {
             game.render(&r, mouse_x, player);
         }
 
+        if sleep > 1 {
+            sleep -= 1;
+            continue;
+        } else if sleep == 1 {
+            game = Game::new(OpenGL::V3_2, game.score);
+            sleep -= 1;
+        }
         window.window.set_title(&format!("Pink: {} | Teal: {}", game.score.pink, game.score.teal));
 
         if let Some(mouse_args) = event.mouse_cursor_args() {
@@ -79,7 +88,7 @@ fn main() {
                     },
                     Move::Win(player) => {
                         game.score.win(player);
-                        game = Game::new(OpenGL::V3_2, game.score);
+                        sleep = 3000;
                     }
                 }
             }
