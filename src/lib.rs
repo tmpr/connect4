@@ -9,9 +9,10 @@ extern crate toml;
 use std::usize;
 
 use graphics::{color::hex, types::Color};
-use opengl_graphics::{GlGraphics, GlyphCache, OpenGL};
+use opengl_graphics::{GlGraphics, OpenGL};
 use piston::input::*;
 
+// Color codes, called via `hex(const_name)`.
 pub const PINK: &str = "E95379";
 pub const GREY: &str = "2E303E";
 pub const DARK_GREY: &str = "232530";
@@ -19,8 +20,8 @@ pub const LIGHT_GREY: &str = "343747";
 pub const TEAL: &str = "27D796";
 
 pub struct Score {
-    teal: u8,
-    pink: u8,
+    pub teal: u8,
+    pub pink: u8,
 }
 
 impl Score {
@@ -35,8 +36,6 @@ impl Score {
             Stone::Neutral => (),
         }
     }
-
-    fn render(&mut self, gl: &mut GlGraphics, arg: &RenderArgs, gc: GlyphCache) {}
 }
 
 /// Game instance which serves as the main API in the main loop.
@@ -54,6 +53,7 @@ pub enum Move<'a> {
     Nothing,
     Invalid(&'a str),
     Kill,
+    Win(Stone)
 }
 
 /// 7 vectors of Stones which can be rendered.
@@ -88,7 +88,7 @@ impl Grid {
 }
 
 /// Player Stone with a particular color.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Stone {
     Pink,
     Teal,
@@ -118,7 +118,7 @@ impl Stone {
 
 impl Game {
     /// Create a new empty game.
-    pub fn new(gl: OpenGL) -> Self {
+    pub fn new(gl: OpenGL, score: Score) -> Self {
         Game {
             gl: GlGraphics::new(gl),
             grid: Grid::neutral(),
@@ -127,7 +127,7 @@ impl Game {
                 .map(|i| (i * 70 + 6) as f64)
                 .map(|x| graphics::rectangle::rectangle_by_corners(x, 0., x + 68., 1000.))
                 .collect(),
-            score: Score::new(),
+            score,
         }
     }
 
@@ -163,6 +163,164 @@ impl Game {
             return Move::Invalid("This column is full! Please choose another one.");
         }
         self.stones.grid[column].push(player);
+
+        let y = self.stones.grid[column].len() - 1;
+        let x = column;
+
+
+
+
+        let mut horizontal = 0;
+        let mut i = 1;
+        // Horizontal Check
+        loop {
+            if column < i {break;}
+            match self.stones.grid.get(column - i) {
+                Some(col) => match col.get(y) {
+                    Some(stone) => {
+                        if stone == &player {
+                            horizontal += 1;
+                            i += 1;
+                        } else {
+                            break;
+                        }
+                    },
+                    None => break
+                }
+                None => break
+            }
+        }
+
+        let mut i = 1;
+        loop {
+            match self.stones.grid.get(column + i) {
+                Some(col) => match col.get(y) {
+                    Some(stone) => {
+                        if stone == &player {
+                            horizontal += 1;
+                            i += 1;
+                        } else {
+                            break;
+                        }
+                    },
+                    None => break
+                }
+                None => break
+            }
+        }
+
+        let mut vertical = 0;
+        let mut i = 1;
+        // Horizontal Check
+        loop {
+            if y < i {break;}
+            match self.stones.grid.get(column) {
+                Some(col) => match col.get(y - i) {
+                    Some(stone) => {
+                        if stone == &player {
+                            vertical += 1;
+                            i += 1;
+                        } else {
+                            break;
+                        }
+                    },
+                    None => break
+                }
+                None => break
+            }
+        }
+
+
+        let mut ldiag = 0;
+        let mut i = 1;
+        // Horizontal Check
+        loop {
+            if y < i {break;}
+            match self.stones.grid.get(column + i) {
+                Some(col) => match col.get(y - i) {
+                    Some(stone) => {
+                        if stone == &player {
+                            ldiag += 1;
+                            i += 1;
+                        } else {
+                            break;
+                        }
+                    },
+                    None => break
+                }
+                None => break
+            }
+        }
+
+        let mut i = 1;
+        // Horizontal Check
+        loop {
+            if column < i {break;}
+            match self.stones.grid.get(column - i) {
+                Some(col) => match col.get(y + i) {
+                    Some(stone) => {
+                        if stone == &player {
+                            ldiag += 1;
+                            i += 1;
+                        } else {
+                            break;
+                        }
+                    },
+                    None => break
+                }
+                None => break
+            }
+        }
+
+        let mut rdiag = 0;
+        let mut i = 1;
+        // Horizontal Check
+        loop {
+            if column < i {break;}
+            match self.stones.grid.get(column + i) {
+                Some(col) => match col.get(y + i) {
+                    Some(stone) => {
+                        if stone == &player {
+                            rdiag += 1;
+                            i += 1;
+                        } else {
+                            break;
+                        }
+                    },
+                    None => break
+                }
+                None => break
+            }
+        }
+
+        let mut i = 1;
+        // Horizontal Check
+        loop {
+            if column < i || y < i {break;}
+            match self.stones.grid.get(column - i) {
+                Some(col) => match col.get(y - i) {
+                    Some(stone) => {
+                        if stone == &player {
+                            rdiag += 1;
+                            i += 1;
+                        } else {
+                            break;
+                        }
+                    },
+                    None => break
+                }
+                None => break
+            }
+        }
+        
+
+
+
+        println!("{}", rdiag);
+        if horizontal >= 3 || vertical >= 3 || ldiag >= 3 || rdiag >= 3 {
+            return Move::Win(player)
+        }
+
         Move::SetStone
     }
 }

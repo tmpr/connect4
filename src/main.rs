@@ -7,18 +7,18 @@ extern crate piston;
 use connect4::*;
 
 use glutin_window::GlutinWindow;
-use opengl_graphics::{OpenGL, TextureSettings, GlyphCache};
+use opengl_graphics::{OpenGL};
 use piston::event_loop::*;
 use piston::input::*;
 use piston::window::WindowSettings;
 
 fn main() {
     // Set up
-    let settings = WindowSettings::new("Connect 4", [600, 500]);
+    let settings = WindowSettings::new("Connect 4", [500, 500]);
 
     let mut window: GlutinWindow = settings.exit_on_esc(true).build().unwrap();
 
-    let mut game = Game::new(OpenGL::V3_2);
+    let mut game = Game::new(OpenGL::V3_2, Score::new());
 
     let mut player = Stone::Pink;
 
@@ -26,11 +26,6 @@ fn main() {
 
     let mut mouse_x = -1.;
 
-    let glyph_cache = GlyphCache::new(
-        "assets/ttf - Mx (mixed outline+bitmap)/Mx437_Acer710_CGA.ttf",
-        (),
-        TextureSettings::new()
-    ).expect("Unable to load font");
 
     // Event Loop
     while let Some(event) = events.next(&mut window) {
@@ -38,6 +33,8 @@ fn main() {
         if let Some(r) = event.render_args() {
             game.render(&r, mouse_x, player);
         }
+
+        window.window.set_title(&format!("Pink: {} | Teal: {}", game.score.pink, game.score.teal));
 
         if let Some(mouse_args) = event.mouse_cursor_args() {
             mouse_x = mouse_args[0];
@@ -49,7 +46,7 @@ fn main() {
                     Button::Keyboard(key) => match key {
                         Key::Q => Move::Kill,
                         Key::R => {
-                            game = Game::new(OpenGL::V3_2);
+                            game = Game::new(OpenGL::V3_2, Score::new());
                             Move::Nothing
                         }
                         _ => Move::Nothing,
@@ -79,6 +76,10 @@ fn main() {
                     Move::Kill => break,
                     Move::Invalid(msg) => {
                         println!("{}", msg)
+                    },
+                    Move::Win(player) => {
+                        game.score.win(player);
+                        game = Game::new(OpenGL::V3_2, game.score);
                     }
                 }
             }
