@@ -27,7 +27,7 @@ fn main() {
     let mut mouse_x = -1.;
 
     let glyph_cache = GlyphCache::new(
-        "../assets/ttf - Mx (mixed outline+bitmap)/Mx437_Acer710_CGA.ttf",
+        "assets/ttf - Mx (mixed outline+bitmap)/Mx437_Acer710_CGA.ttf",
         (),
         TextureSettings::new()
     ).expect("Unable to load font");
@@ -48,18 +48,11 @@ fn main() {
                 let move_ = match button {
                     Button::Keyboard(key) => match key {
                         Key::Q => Move::Kill,
-                        Key::D1 => game.add_stone(player, 6),
-                        Key::D2 => game.add_stone(player, 5),
-                        Key::D3 => game.add_stone(player, 4),
-                        Key::D4 => game.add_stone(player, 3),
-                        Key::D5 => game.add_stone(player, 2),
-                        Key::D6 => game.add_stone(player, 1),
-                        Key::D7 => game.add_stone(player, 0),
                         Key::R => {
                             game = Game::new(OpenGL::V3_2);
-                            Move::Pass
+                            Move::Nothing
                         }
-                        _ => Move::Pass,
+                        _ => Move::Nothing,
                     },
                     Button::Mouse(click) => match click {
                         MouseButton::Left => {
@@ -67,15 +60,15 @@ fn main() {
                                 rect[0] <= mouse_x && rect[0] + rect[2] >= mouse_x
                             }) {
                                 Some((i, _)) => game.add_stone(player, i),
-                                None => Move::Pass,
+                                None => Move::Nothing,
                             }
                         }
-                        _ => Move::Pass,
+                        _ => Move::Nothing,
                     },
-                    _ => Move::Pass,
+                    _ => Move::Nothing,
                 };
                 match move_ {
-                    Move::Pass => (),
+                    Move::Nothing => (),
                     Move::SetStone => {
                         player = match player {
                             Stone::Pink => Stone::Teal,

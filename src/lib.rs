@@ -9,9 +9,8 @@ extern crate toml;
 use std::usize;
 
 use graphics::{color::hex, types::Color};
-use opengl_graphics::{GlGraphics, OpenGL};
+use opengl_graphics::{GlGraphics, GlyphCache, OpenGL};
 use piston::input::*;
-// use music::{play_sound, Repeat};
 
 pub const PINK: &str = "E95379";
 pub const GREY: &str = "2E303E";
@@ -25,10 +24,10 @@ pub struct Score {
 }
 
 impl Score {
-    pub fn new() -> Self{
-        Score {teal: 0, pink: 0}
+    pub fn new() -> Self {
+        Score { teal: 0, pink: 0 }
     }
-    
+
     pub fn win(&mut self, player: Stone) {
         match player {
             Stone::Pink => self.pink += 1,
@@ -37,45 +36,48 @@ impl Score {
         }
     }
 
-    fn render(&mut self, gl: &mut GlGraphics, arg: &RenderArgs, gc: Gly) {
-        
-    }
-
+    fn render(&mut self, gl: &mut GlGraphics, arg: &RenderArgs, gc: GlyphCache) {}
 }
 
+/// Game instance which serves as the main API in the main loop.
 pub struct Game {
     gl: GlGraphics,
     pub grid: Grid,
     pub stones: Grid,
     pub foci: Vec<[f64; 4]>,
-    pub score: Score
+    pub score: Score,
 }
 
-pub enum Move {
+/// Possible action by player.
+pub enum Move<'a> {
     SetStone,
-    Pass,
-    Invalid(String),
+    Nothing,
+    Invalid(&'a str),
     Kill,
 }
 
+/// 7 vectors of Stones which can be rendered.
 #[derive(Debug)]
 pub struct Grid {
     grid: Vec<Vec<Stone>>,
 }
 
 impl Grid {
+    /// Neutral Grid already filled. Virtually works as a background grid.
     fn neutral() -> Self {
         Grid {
             grid: vec![vec![Stone::Neutral; 6]; 7],
         }
     }
 
+    /// Return empty grid: Used for player stones.
     fn empty() -> Self {
         Grid {
             grid: vec![Vec::new(); 7],
         }
     }
 
+    /// Renders grid.
     fn render(&mut self, gl: &mut GlGraphics, arg: &RenderArgs) {
         for (x, row) in self.grid.iter_mut().enumerate() {
             for (y, stone) in row.iter_mut().enumerate() {
@@ -85,6 +87,7 @@ impl Grid {
     }
 }
 
+/// Player Stone with a particular color.
 #[derive(Debug, Clone, Copy)]
 pub enum Stone {
     Pink,
@@ -93,6 +96,7 @@ pub enum Stone {
 }
 
 impl Stone {
+    /// Return Color based on Stone variant.
     fn color(&self) -> Color {
         match self {
             Stone::Pink => hex(PINK),
@@ -101,6 +105,7 @@ impl Stone {
         }
     }
 
+    /// Render Stone at some (manipulated) position.
     fn render(&mut self, x: usize, y: i32, gl: &mut GlGraphics, arg: &RenderArgs) {
         let circle =
             graphics::ellipse::circle((x * 70 + 40) as f64, (y * 70 + 105) as f64, 30 as f64);
@@ -112,6 +117,7 @@ impl Stone {
 }
 
 impl Game {
+    /// Create a new empty game.
     pub fn new(gl: OpenGL) -> Self {
         Game {
             gl: GlGraphics::new(gl),
@@ -121,14 +127,17 @@ impl Game {
                 .map(|i| (i * 70 + 6) as f64)
                 .map(|x| graphics::rectangle::rectangle_by_corners(x, 0., x + 68., 1000.))
                 .collect(),
-            score: Score::new()
+            score: Score::new(),
         }
     }
 
+    /// Render Game and all of its fields.
     pub fn render(&mut self, arg: &RenderArgs, mouse_x: f64, player: Stone) {
+        // Render Window and Background
         self.gl
             .draw(arg.viewport(), |_, gl| graphics::clear(hex(GREY), gl));
 
+        // Render Focus based on mouse args.
         if let Some((x, focus)) = self
             .foci
             .iter()
@@ -138,21 +147,22 @@ impl Game {
             self.gl.draw(arg.viewport(), |c, gl| {
                 graphics::rectangle(hex(LIGHT_GREY), focus.clone(), c.transform, gl);
 
+                // Render Preview / Focus Stone
                 player.clone().render(x, -1, gl, arg)
             });
         }
+
         self.grid.render(&mut self.gl, arg);
         self.stones.render(&mut self.gl, arg);
     }
 
+    /// Add stone to column. 
+    /// The rightmost column has index 0, the leftmost column has index 6.
     pub fn add_stone(&mut self, player: Stone, column: usize) -> Move {
         if self.stones.grid[column].len() == 6 {
-            return Move::Invalid(String::from(
-                "This column is full! Please choose another one.",
-            ));
+            return Move::Invalid("This column is full! Please choose another one.");
         }
         self.stones.grid[column].push(player);
-        // play_sound(&1, Repeat::Times(3), 0.3);
         Move::SetStone
     }
 }
