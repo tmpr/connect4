@@ -15,6 +15,8 @@ use piston::event_loop::*;
 use piston::input::*;
 use piston::window::WindowSettings;
 
+pub const WIN_WAITING_TIME: u32 = 3000;
+
 fn main() {
     // Set up
     let settings = WindowSettings::new("Connect 4", [500, 500]);
@@ -103,7 +105,7 @@ fn main() {
                     }
                     Move::Win(player) => {
                         game.score.win(player);
-                        sleep = 3000;
+                        sleep = WIN_WAITING_TIME;
                     }
                 }
             }
