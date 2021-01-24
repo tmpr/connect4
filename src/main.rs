@@ -1,19 +1,20 @@
+extern crate connect4;
 extern crate glutin_window;
 extern crate graphics;
 extern crate opengl_graphics;
 extern crate piston;
-extern crate connect4;
 
 use connect4::*;
 
 use glutin_window::GlutinWindow;
-use opengl_graphics::OpenGL;
+use opengl_graphics::{OpenGL, TextureSettings, GlyphCache};
 use piston::event_loop::*;
 use piston::input::*;
 use piston::window::WindowSettings;
 
 fn main() {
-    let settings = WindowSettings::new("Connect 4", [500, 500]);
+    // Set up
+    let settings = WindowSettings::new("Connect 4", [600, 500]);
 
     let mut window: GlutinWindow = settings.exit_on_esc(true).build().unwrap();
 
@@ -22,44 +23,73 @@ fn main() {
     let mut player = Stone::Pink;
 
     let mut events = Events::new(EventSettings::new());
+
+    let mut mouse_x = -1.;
+
+    let glyph_cache = GlyphCache::new(
+        "../assets/ttf - Mx (mixed outline+bitmap)/Mx437_Acer710_CGA.ttf",
+        (),
+        TextureSettings::new()
+    ).expect("Unable to load font");
+
+    // Event Loop
     while let Some(event) = events.next(&mut window) {
+
         if let Some(r) = event.render_args() {
-            game.render(&r);
+            game.render(&r, mouse_x, player);
         }
 
         if let Some(mouse_args) = event.mouse_cursor_args() {
-            // TODO: Add Mouse Focus and Mouse Commands
-        } 
+            mouse_x = mouse_args[0];
+        }
 
-        if let Some(press_event) = event.press_args() {         
-            
-            if let Button::Keyboard(key) = press_event {
-                let result = match key {
-                    Key::Q => break,
-                    Key::D1 => game.make_move(player, 6),
-                    Key::D2 => game.make_move(player, 5),
-                    Key::D3 => game.make_move(player, 4),
-                    Key::D4 => game.make_move(player, 3),
-                    Key::D5 => game.make_move(player, 2),
-                    Key::D6 => game.make_move(player, 1),
-                    Key::D7 => game.make_move(player, 0),
-                    Key::R => {
-                        game = Game::new(OpenGL::V3_2);
-                        Ok(())
+        match event.press_args() {
+            Some(button) => {
+                let move_ = match button {
+                    Button::Keyboard(key) => match key {
+                        Key::Q => Move::Kill,
+                        Key::D1 => game.add_stone(player, 6),
+                        Key::D2 => game.add_stone(player, 5),
+                        Key::D3 => game.add_stone(player, 4),
+                        Key::D4 => game.add_stone(player, 3),
+                        Key::D5 => game.add_stone(player, 2),
+                        Key::D6 => game.add_stone(player, 1),
+                        Key::D7 => game.add_stone(player, 0),
+                        Key::R => {
+                            game = Game::new(OpenGL::V3_2);
+                            Move::Pass
+                        }
+                        _ => Move::Pass,
                     },
-                    _ => continue
+                    Button::Mouse(click) => match click {
+                        MouseButton::Left => {
+                            match game.foci.iter().rev().enumerate().find(|(_, rect)| {
+                                rect[0] <= mouse_x && rect[0] + rect[2] >= mouse_x
+                            }) {
+                                Some((i, _)) => game.add_stone(player, i),
+                                None => Move::Pass,
+                            }
+                        }
+                        _ => Move::Pass,
+                    },
+                    _ => Move::Pass,
                 };
-                match result {
-                    Ok(_) => {
+                match move_ {
+                    Move::Pass => (),
+                    Move::SetStone => {
                         player = match player {
                             Stone::Pink => Stone::Teal,
                             Stone::Teal => Stone::Pink,
                             _ => Stone::Pink,
                         }
                     }
-                    Err(msg) => println!("{}", msg),
+                    Move::Kill => break,
+                    Move::Invalid(msg) => {
+                        println!("{}", msg)
+                    }
                 }
             }
+            _ => continue,
         }
     }
 }
