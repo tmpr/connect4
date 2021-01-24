@@ -4,10 +4,13 @@ extern crate graphics;
 extern crate opengl_graphics;
 extern crate piston;
 
+mod game;
+
 use connect4::*;
+use game::Game;
 
 use glutin_window::GlutinWindow;
-use opengl_graphics::{OpenGL};
+use opengl_graphics::OpenGL;
 use piston::event_loop::*;
 use piston::input::*;
 use piston::window::WindowSettings;
@@ -26,25 +29,37 @@ fn main() {
 
     let mut mouse_x = -1.;
 
-
+    // Sleep indicator for later, such that we can produce a "break" in rendering.
     let mut sleep = 0;
 
     // Event Loop
     while let Some(event) = events.next(&mut window) {
-
         if let Some(r) = event.render_args() {
             game.render(&r, mouse_x, player);
         }
 
+        // Triggered by winning the game: We want to give the player 2 seconds
+        // to look at finished game.
         if sleep > 1 {
             sleep -= 1;
+            window.window.set_title(&format!(
+                "{} won!",
+                match player {
+                    Stone::Teal => "Teal",
+                    Stone::Pink => "Pink",
+                    _ => "Dummy String",
+                }
+            ));
             continue;
         } else if sleep == 1 {
             game = Game::new(OpenGL::V3_2, game.score);
             sleep -= 1;
         }
-        window.window.set_title(&format!("Pink: {} | Teal: {}", game.score.pink, game.score.teal));
 
+        window.window.set_title(&format!(
+            "Pink: {} | Teal: {}",
+            game.score.pink, game.score.teal
+        ));
         if let Some(mouse_args) = event.mouse_cursor_args() {
             mouse_x = mouse_args[0];
         }
@@ -85,7 +100,7 @@ fn main() {
                     Move::Kill => break,
                     Move::Invalid(msg) => {
                         println!("{}", msg)
-                    },
+                    }
                     Move::Win(player) => {
                         game.score.win(player);
                         sleep = 3000;
