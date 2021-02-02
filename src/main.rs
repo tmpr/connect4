@@ -18,7 +18,7 @@ use piston::window::WindowSettings;
 pub const WIN_WAITING_TIME: u32 = 3000;
 
 fn main() {
-    // Set up
+    // Set up 🏗️
     let settings = WindowSettings::new("Connect 4", [500, 500]);
 
     let mut window: GlutinWindow = settings.exit_on_esc(true).build().unwrap();
@@ -34,14 +34,13 @@ fn main() {
     // Sleep indicator for later, such that we can produce a "break" in rendering.
     let mut sleep = 0;
 
-    // Event Loop
+    // Event Loop 🔁
     while let Some(event) = events.next(&mut window) {
         if let Some(r) = event.render_args() {
             game.render(&r, mouse_x, player);
         }
 
-        // Triggered by winning the game: We want to give the player 2 seconds
-        // to look at finished game.
+        // After a win, freeze the game for some time ❄️
         if sleep > 1 {
             sleep -= 1;
             window.window.set_title(&format!(

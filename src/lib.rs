@@ -10,13 +10,14 @@ use graphics::{color::hex, types::Color};
 use opengl_graphics::GlGraphics;
 use piston::input::*;
 
-// Color codes, called via `hex(const_name)`.
+// Color codes, called via `hex(const_name)` 🎨
 pub const PINK: &str = "E95379";
 pub const GREY: &str = "2E303E";
 pub const DARK_GREY: &str = "232530";
 pub const LIGHT_GREY: &str = "343747";
 pub const TEAL: &str = "27D796";
 
+/// Struct to keep score of wins. 
 pub struct Score {
     pub teal: u8,
     pub pink: u8,
@@ -36,7 +37,7 @@ impl Score {
     }
 }
 
-/// Possible action by player.
+/// Possible action by player. ♟️
 pub enum Move<'a> {
     SetStone,
     Nothing,
@@ -45,7 +46,7 @@ pub enum Move<'a> {
     Win(Stone),
 }
 
-/// 7 vectors of Stones which can be rendered.
+/// 7 vectors of Stones which can be rendered. 
 #[derive(Debug)]
 pub struct Grid {
     pub grid: Vec<Vec<Stone>>,
@@ -66,7 +67,7 @@ impl Grid {
         }
     }
 
-    /// Renders grid.
+    /// Renders grid. 🖌️
     pub fn render(&mut self, gl: &mut GlGraphics, arg: &RenderArgs) {
         for (x, row) in self.grid.iter_mut().enumerate() {
             for (y, stone) in row.iter_mut().enumerate() {
@@ -76,7 +77,7 @@ impl Grid {
     }
 }
 
-/// Player Stone with a particular color.
+/// Player Stone with a particular color. 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Stone {
     Pink,
@@ -94,7 +95,7 @@ impl Stone {
         }
     }
 
-    /// Render Stone at some (manipulated) position.
+    /// Render Stone at some (manipulated) position. 🖌️
     pub fn render(&mut self, x: usize, y: i32, gl: &mut GlGraphics, arg: &RenderArgs) {
         let circle =
             graphics::ellipse::circle((x * 70 + 40) as f64, (y * 70 + 105) as f64, 30 as f64);

@@ -17,7 +17,7 @@ pub const LIGHT_GREY: &str = "343747";
 use connect4::*;
 
 
-/// Game instance which serves as the main API in the main loop.
+/// Game  instance which serves as the main API in the main loop.
 pub struct Game {
     gl: GlGraphics,
     pub grid: Grid,
@@ -42,7 +42,7 @@ impl Game {
         }
     }
 
-    /// Render Game and all of its fields.
+    /// Render Game and all of its fields. 🖌️
     pub fn render(&mut self, arg: &RenderArgs, mouse_x: f64, player: Stone) {
         // Render Window and Background
         self.gl
